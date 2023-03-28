@@ -13,7 +13,9 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  compiler.flush();
+  compiler.flush(()=>{
+
+  });
   res.sendFile(path.join(__dirname, "/index.html"));
 });
 app.post("/compile", (req, res) => {
