@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="codemirror5-master/lib/codemirror.css">
+    <script src="codemirror5-master/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror5-master/theme/dracula.css">
+    <script src="codemirror5-master/mode/clike/clike.js"></script>
+    <script src="codemirror5-master/addon/edit/closebrackets.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <script src="codemirror5-master/mode/python/python.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="row m-3">
+        <div class="col ">
+            <div class = "d-flex justify-content-between mb-2 bg-dark rounded p-2">
+                <div class="col-12 w-25">
+                    <label class="visually-hidden" for="autoSizingSelect">Preference</label>
+                    <select class="form-select" id="autoSizingSelect">
+                        <option >Choose...</option>
+                        <option value="Java">Java</option>
+                        <option value="Cpp">Cpp</option>
+                        <option value="Python">Python</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-success">Code-Sprint</button>
+                    <button type="button" id="run" class="btn btn-success"><i class="bi bi-play-fill"></i></button>
+                </div>
+            </div>
+            <textarea id="editor" type="text" class="form-control"></textarea>
+        </div>
+        <div class="col d-flex flex-column bg-dark px-4 rounded">
+            <div class="h-50">
+                <label for="Input" class="text-light mt-2 mb-2">Input</label>
+                <textarea type="text" id="input" class="form-control h-75 rounded" ></textarea>
+            </div>
+            <div class="h-50">
+                <label for="Output" class="text-light mb-2">Output</label>
+                <textarea type="text" id="outputArea" class="form-control h-75 rounded" ></textarea>
+            </div>
+            
+        </div>
+    </div>
+</body>
+<script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+        mode: "text/x-c++src",
+        theme: "dracula",
+        autoCloseBrackets: true,
+        lineNumbers: true
+    })
+    var options = document.getElementById("autoSizingSelect");
+    var input = document.getElementById("input");
+    var output = document.getElementById("outputArea");
+    var run = document.getElementById("run");
+    var width = window.innerWidth;
+
+    editor.setSize(0.7 * width,"500")
+    options.addEventListener("change", function (){
+        if(options.value === "Java"){
+            editor.setOption("mode","text/x-java")
+        }
+        else if(options.value === "Cpp"){
+            editor.setOption("mode","text/x-c++src")
+        }
+        else if(options.value === "Python"){
+            editor.setOption("mode","text/x-python")
+        }
+    })
+    run.addEventListener("click",async()=>{
+        var code = {
+            code: editor.getValue(),
+            lang: options.value,
+            inputs: input.value
+        }
+        await fetch("http://localhost:3000/compile",{
+            method:"POST",
+            headers : {
+                "Content-Type":"application/json"
+            },
+            body : JSON.stringify(code)
+        }).then(async(res)=>{
+            var d = await res.json();
+            output.value = d.output;
+        }).catch((err)=>{
+            console.log(err);
+        });
+    })
+
+</script>
+
+</html>
